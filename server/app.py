@@ -54,11 +54,28 @@ class Pizzas(Resource):
         pizzas = [pizza.to_dict(only=('id','ingredients','name')) for pizza in Pizza.query.all()]
         return make_response(jsonify(pizzas), 200)
     
+class Restaurant_Pizzas(Resource):
+    def post(self):
+        json = request.get_json()
+        
+        try:
+            new_restaurant_pizza = RestaurantPizza(
+                price = json['price'],
+                pizza_id = json['pizza_id'],
+                restaurant_id = json['restaurant_id']
+            )
+            db.session.add(new_restaurant_pizza)
+            db.session.commit()
 
+        except ValueError:
+            return {'errors':['validation errors']}, 400
+        
+        return make_response(jsonify(new_restaurant_pizza.to_dict()), 201)
     
 api.add_resource(Restaurants,'/restaurants')
 api.add_resource(Restaurant_id,'/restaurants/<int:id>')
 api.add_resource(Pizzas,'/pizzas')
+api.add_resource(Restaurant_Pizzas,'/restaurant_pizzas')
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
